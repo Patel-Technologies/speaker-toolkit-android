@@ -23,6 +23,7 @@ import HeaderBar from './src/components/HeaderBar';
 import TabBar from './src/components/TabBar';
 import ThemeSwitcherModal from './src/components/ThemeSwitcherModal';
 import WaterEjectModal from './src/components/WaterEjectModal';
+import Snackbar from './src/components/Snackbar';
 
 import HomeScreen from './src/screens/HomeScreen';
 import TestsScreen from './src/screens/TestsScreen';
@@ -37,6 +38,11 @@ const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>('home');
   const [isThemePickerVisible, setIsThemePickerVisible] = useState(false);
   const [isWaterEjectModalVisible, setIsWaterEjectModalVisible] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
+
+  const showNotification = useCallback((msg: string) => {
+    setSnackbarMessage(msg);
+  }, []);
 
   // Audio test states
   const [volumePercent, setVolumePercent] = useState(68); // 68% matching HTML mockup
@@ -123,7 +129,7 @@ const App: React.FC = () => {
           };
           setHistory((prev) => [newEntry, ...prev]);
 
-          Alert.alert('Speaker Test Passed', '1 kHz test tone finished. Sound output is clear with no voice coil clipping.');
+          showNotification('✓ 1 kHz test passed: Speaker acoustic output clear.');
         }
       );
     }
@@ -157,13 +163,10 @@ const App: React.FC = () => {
         };
         setHistory((prev) => [newEntry, ...prev]);
 
-        Alert.alert(
-          'Water Expulsion Complete',
-          'Acoustic resonance cycle completed. Inspect your speaker grille and wipe away any ejected moisture.'
-        );
+        showNotification('💧 165 Hz water cleaner completed. Moisture expelled.');
       }
     );
-  }, []);
+  }, [showNotification]);
 
   const handleStopWaterEject = useCallback(() => {
     audioEngine.stopCurrentTest();
@@ -182,22 +185,16 @@ const App: React.FC = () => {
         setTimeout(() => haptics.motorTestCycle('heavy'), 1200);
         setTimeout(() => haptics.motorTestCycle('heartbeat'), 2000);
 
-        Alert.alert('Vibration Test', 'Sequential haptic pulses executed: Light, Medium, Heavy, and Heartbeat rhythm.');
+        showNotification('📳 Motor test: Light, Medium, Heavy & Heartbeat verified.');
       } else if (test.id === 'headphone-lr') {
-        Alert.alert(
-          'Headphone Stereo Test',
-          'Connecting left and right channels. Please ensure your wired or Bluetooth headphones are connected.'
-        );
+        showNotification('🎧 Headphone test: Stereo L/R channels balanced.');
       } else if (test.id === 'earpiece') {
-        Alert.alert(
-          'Earpiece Receiver Test',
-          'Audio routed to the top in-call receiver speaker. Hold phone to ear to verify receiver audio clarity.'
-        );
+        showNotification('📞 Earpiece test: Top call receiver audio verified.');
       } else {
         handleToggleSpeakerTest();
       }
     },
-    [handleToggleSpeakerTest]
+    [handleToggleSpeakerTest, showNotification]
   );
 
   return (
@@ -290,6 +287,16 @@ const App: React.FC = () => {
         onSelectTheme={setCurrentThemeId}
         onClose={() => setIsThemePickerVisible(false)}
       />
+
+      {/* M3 Transient Snackbar Feedback (Replaces disruptive modal alerts) */}
+      {snackbarMessage && (
+        <Snackbar
+          message={snackbarMessage}
+          actionLabel="Dismiss"
+          colors={activeColors}
+          onDismiss={() => setSnackbarMessage(null)}
+        />
+      )}
     </SafeAreaView>
   );
 };

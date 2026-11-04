@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SoundTest, ThemeColors } from '../types';
 import TestRowItem from '../components/TestRowItem';
+import SegmentedButton from '../components/SegmentedButton';
 import { TOOLKIT_TESTS } from '../data/tests';
 
 interface TestsScreenProps {
@@ -9,7 +10,23 @@ interface TestsScreenProps {
   onSelectTest: (test: SoundTest) => void;
 }
 
+type CategoryFilter = 'all' | 'hardware' | 'cleaning' | 'diagnostics';
+
 const TestsScreen: React.FC<TestsScreenProps> = ({ colors, onSelectTest }) => {
+  const [activeFilter, setActiveFilter] = useState<CategoryFilter>('all');
+
+  const filteredTests = useMemo(() => {
+    if (activeFilter === 'all') return TOOLKIT_TESTS;
+    return TOOLKIT_TESTS.filter((t) => t.category === activeFilter);
+  }, [activeFilter]);
+
+  const filterOptions = [
+    { key: 'all' as CategoryFilter, label: 'All', count: TOOLKIT_TESTS.length },
+    { key: 'hardware' as CategoryFilter, label: 'Drivers' },
+    { key: 'cleaning' as CategoryFilter, label: 'Water' },
+    { key: 'diagnostics' as CategoryFilter, label: 'Sensors' },
+  ];
+
   return (
     <ScrollView
       style={styles.container}
@@ -23,18 +40,26 @@ const TestsScreen: React.FC<TestsScreenProps> = ({ colors, onSelectTest }) => {
         </Text>
       </View>
 
+      {/* M3 Segmented Button Quick Filter */}
+      <SegmentedButton
+        options={filterOptions}
+        selectedKey={activeFilter}
+        colors={colors}
+        onSelect={setActiveFilter}
+      />
+
       <View
         style={[
           styles.listContainer,
           { backgroundColor: colors.surface, borderColor: colors.line },
         ]}
       >
-        {TOOLKIT_TESTS.map((test, index) => (
+        {filteredTests.map((test, index) => (
           <TestRowItem
             key={test.id}
             test={test}
             colors={colors}
-            isLast={index === TOOLKIT_TESTS.length - 1}
+            isLast={index === filteredTests.length - 1}
             onPress={onSelectTest}
           />
         ))}
@@ -50,7 +75,7 @@ const styles = StyleSheet.create({
   content: {
     paddingHorizontal: 16,
     paddingVertical: 12,
-    gap: 12,
+    gap: 14,
   },
   header: {
     gap: 4,
