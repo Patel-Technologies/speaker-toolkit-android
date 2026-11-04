@@ -15,6 +15,8 @@ interface HomeScreenProps {
   waveData: WaveBarState[];
   volumePercent: number;
   isBoostMode: boolean;
+  selectedFrequency: number;
+  onSelectFrequency: (freq: number) => void;
   onToggleSpeakerTest: () => void;
   onVolumeChange: (vol: number) => void;
   onToggleBoost: () => void;
@@ -29,6 +31,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
   waveData,
   volumePercent,
   isBoostMode,
+  selectedFrequency,
+  onSelectFrequency,
   onToggleSpeakerTest,
   onVolumeChange,
   onToggleBoost,
@@ -56,6 +60,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
         elapsedTime={speakerTestElapsed}
         duration={speakerTestDuration}
         waveData={waveData}
+        selectedFrequency={selectedFrequency}
+        onSelectFrequency={onSelectFrequency}
         onToggleTest={onToggleSpeakerTest}
       />
 

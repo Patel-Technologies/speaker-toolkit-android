@@ -46,21 +46,23 @@ class AudioEngine {
     });
   }
 
-  // Run 1 kHz Speaker Test
+  // Run Speaker Test Tone
   startSpeakerTest(
     durationSeconds: number,
+    frequency: number = 1000,
     onTick: (elapsed: number, wave: WaveBarState[]) => void,
     onComplete: () => void
   ) {
     this.stopCurrentTest();
     this.isPlaying = true;
+    this.currentFrequency = frequency;
     let elapsed = 0;
 
     haptics.testRunningPulse();
 
     this.activeTestTimer = setInterval(() => {
       elapsed += 0.1;
-      const wave = this.generateWaveformData(true, 1000, 75);
+      const wave = this.generateWaveformData(true, frequency, 75);
       onTick(Math.min(elapsed, durationSeconds), wave);
 
       if (Math.round(elapsed * 10) % 10 === 0) {

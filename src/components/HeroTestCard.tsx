@@ -9,8 +9,18 @@ interface HeroTestCardProps {
   elapsedTime: number;
   duration: number;
   waveData: WaveBarState[];
+  selectedFrequency?: number;
+  onSelectFrequency?: (freq: number) => void;
   onToggleTest: () => void;
 }
+
+const FREQUENCY_PRESETS = [
+  { label: '100 Hz', value: 100, sub: 'Bass' },
+  { label: '440 Hz', value: 440, sub: 'Mid' },
+  { label: '1 kHz', value: 1000, sub: 'Std' },
+  { label: '4 kHz', value: 4000, sub: 'Vocal' },
+  { label: '12 kHz', value: 12000, sub: 'High' },
+];
 
 const HeroTestCard: React.FC<HeroTestCardProps> = ({
   colors,
@@ -18,6 +28,8 @@ const HeroTestCard: React.FC<HeroTestCardProps> = ({
   elapsedTime,
   duration,
   waveData,
+  selectedFrequency = 1000,
+  onSelectFrequency,
   onToggleTest,
 }) => {
   return (
@@ -32,7 +44,9 @@ const HeroTestCard: React.FC<HeroTestCardProps> = ({
     >
       {/* Subtitle / Spec tag */}
       <View style={styles.topRow}>
-        <Text style={[styles.lbl, { color: colors.ink }]}>TEST TONE · 1 KHZ</Text>
+        <Text style={[styles.lbl, { color: colors.ink }]}>
+          TEST TONE · {selectedFrequency >= 1000 ? `${selectedFrequency / 1000} KHZ` : `${selectedFrequency} HZ`}
+        </Text>
         {isRunning && (
           <View style={[styles.liveTag, { backgroundColor: colors.accent }]}>
             <Text style={styles.liveTagText}>ACTIVE</Text>
@@ -44,6 +58,36 @@ const HeroTestCard: React.FC<HeroTestCardProps> = ({
       <Text style={[styles.big, { color: colors.ink }]}>
         {isRunning ? `Testing speaker... (${(duration - elapsedTime).toFixed(1)}s)` : 'Check your speaker'}
       </Text>
+
+      {/* Frequency Presets Row */}
+      <View style={styles.presetsRow}>
+        {FREQUENCY_PRESETS.map((p) => {
+          const isSelected = selectedFrequency === p.value;
+          return (
+            <TouchableOpacity
+              key={p.value}
+              onPress={() => onSelectFrequency?.(p.value)}
+              style={[
+                styles.presetPill,
+                {
+                  backgroundColor: isSelected ? colors.accent : colors.surface,
+                  borderColor: isSelected ? colors.lineStrong : colors.line,
+                },
+              ]}
+              hitSlop={{ top: 6, bottom: 6, left: 4, right: 4 }}
+            >
+              <Text
+                style={[
+                  styles.presetText,
+                  { color: isSelected ? '#0B090B' : colors.ink },
+                ]}
+              >
+                {p.label}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
 
       {/* 12-Bar Sound Visualizer (matching HTML mockup) */}
       <View style={styles.waveContainer} aria-hidden={true}>
@@ -119,7 +163,24 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     letterSpacing: -0.3,
     marginTop: 2,
-    marginBottom: 8,
+    marginBottom: 6,
+  },
+  presetsRow: {
+    flexDirection: 'row',
+    gap: 6,
+    marginBottom: 10,
+  },
+  presetPill: {
+    flex: 1,
+    paddingVertical: 5,
+    borderRadius: 8,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  presetText: {
+    fontSize: 10.5,
+    fontWeight: '700',
   },
   waveContainer: {
     flexDirection: 'row',

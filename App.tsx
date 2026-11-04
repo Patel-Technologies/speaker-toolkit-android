@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import {
   SafeAreaView,
   StatusBar,
@@ -8,6 +8,7 @@ import {
   Alert,
   LogBox,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { THEMES } from './src/theme';
 import {
   AppSettings,
@@ -46,6 +47,7 @@ const App: React.FC = () => {
 
   // Audio test states
   const [volumePercent, setVolumePercent] = useState(68); // 68% matching HTML mockup
+  const [selectedFrequency, setSelectedFrequency] = useState(1000); // Default 1 kHz
   const [isSpeakerTestRunning, setIsSpeakerTestRunning] = useState(false);
   const [speakerTestElapsed, setSpeakerTestElapsed] = useState(0);
   const [waveData, setWaveData] = useState<WaveBarState[]>(() =>
@@ -109,6 +111,7 @@ const App: React.FC = () => {
 
       audioEngine.startSpeakerTest(
         5,
+        selectedFrequency,
         (elapsed, wave) => {
           setSpeakerTestElapsed(elapsed);
           setWaveData(wave);
@@ -122,14 +125,14 @@ const App: React.FC = () => {
           const newEntry: TestHistoryEntry = {
             id: `test_${Date.now()}`,
             testId: 'speaker-1khz',
-            testTitle: '1 kHz Speaker Test',
+            testTitle: `${selectedFrequency >= 1000 ? `${selectedFrequency / 1000} kHz` : `${selectedFrequency} Hz`} Speaker Test`,
             timestamp: 'Just now',
             passed: true,
-            notes: `Completed 5s sine sweep at ${volumePercent}% volume.`,
+            notes: `Completed 5s sine sweep at ${volumePercent}% volume. Output clean.`,
           };
           setHistory((prev) => [newEntry, ...prev]);
 
-          showNotification('✓ 1 kHz test passed: Speaker acoustic output clear.');
+          showNotification(`✓ ${selectedFrequency >= 1000 ? `${selectedFrequency / 1000} kHz` : `${selectedFrequency} Hz`} test passed: Speaker output clear.`);
         }
       );
     }
@@ -227,6 +230,8 @@ const App: React.FC = () => {
               waveData={waveData}
               volumePercent={volumePercent}
               isBoostMode={settings.volumeBoostEnabled}
+              selectedFrequency={selectedFrequency}
+              onSelectFrequency={setSelectedFrequency}
               onToggleSpeakerTest={handleToggleSpeakerTest}
               onVolumeChange={setVolumePercent}
               onToggleBoost={() =>
