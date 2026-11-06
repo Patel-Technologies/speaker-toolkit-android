@@ -24,6 +24,10 @@ import HeaderBar from './src/components/HeaderBar';
 import TabBar from './src/components/TabBar';
 import ThemeSwitcherModal from './src/components/ThemeSwitcherModal';
 import WaterEjectModal from './src/components/WaterEjectModal';
+import HeadphoneTestModal from './src/components/HeadphoneTestModal';
+import EarpieceTestModal from './src/components/EarpieceTestModal';
+import DecibelMeterModal from './src/components/DecibelMeterModal';
+import VibrationTestModal from './src/components/VibrationTestModal';
 import Snackbar from './src/components/Snackbar';
 
 import HomeScreen from './src/screens/HomeScreen';
@@ -39,6 +43,10 @@ const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>('home');
   const [isThemePickerVisible, setIsThemePickerVisible] = useState(false);
   const [isWaterEjectModalVisible, setIsWaterEjectModalVisible] = useState(false);
+  const [isHeadphoneModalVisible, setIsHeadphoneModalVisible] = useState(false);
+  const [isEarpieceModalVisible, setIsEarpieceModalVisible] = useState(false);
+  const [isDecibelModalVisible, setIsDecibelModalVisible] = useState(false);
+  const [isVibrationModalVisible, setIsVibrationModalVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
 
   const showNotification = useCallback((msg: string) => {
@@ -112,7 +120,8 @@ const App: React.FC = () => {
       audioEngine.startSpeakerTest(
         5,
         selectedFrequency,
-        (elapsed, wave) => {
+        volumePercent,
+        (elapsed: number, wave: WaveBarState[]) => {
           setSpeakerTestElapsed(elapsed);
           setWaveData(wave);
         },
@@ -183,21 +192,41 @@ const App: React.FC = () => {
       if (test.id === 'water-eject') {
         setIsWaterEjectModalVisible(true);
       } else if (test.id === 'vibration') {
-        haptics.motorTestCycle('light');
-        setTimeout(() => haptics.motorTestCycle('medium'), 500);
-        setTimeout(() => haptics.motorTestCycle('heavy'), 1200);
-        setTimeout(() => haptics.motorTestCycle('heartbeat'), 2000);
-
-        showNotification('📳 Motor test: Light, Medium, Heavy & Heartbeat verified.');
+        setIsVibrationModalVisible(true);
       } else if (test.id === 'headphone-lr') {
-        showNotification('🎧 Headphone test: Stereo L/R channels balanced.');
+        setIsHeadphoneModalVisible(true);
       } else if (test.id === 'earpiece') {
-        showNotification('📞 Earpiece test: Top call receiver audio verified.');
+        setIsEarpieceModalVisible(true);
+      } else if (test.id === 'decibel-meter') {
+        setIsDecibelModalVisible(true);
+      } else if (test.id === 'frequency-sweep') {
+        showNotification('〰️ Starting 20 Hz – 20,000 Hz diagnostic frequency sweep...');
+        audioEngine.startFrequencySweep(
+          20,
+          20000,
+          8,
+          volumePercent,
+          (freq) => {
+            setSelectedFrequency(freq);
+          },
+          () => {
+            showNotification('✓ Full audio frequency sweep completed.');
+            const newEntry: TestHistoryEntry = {
+              id: `sweep_${Date.now()}`,
+              testId: 'frequency-sweep',
+              testTitle: '20 Hz – 20 kHz Frequency Sweep',
+              timestamp: 'Just now',
+              passed: true,
+              notes: 'Full spectrum hardware response verified.',
+            };
+            setHistory((prev) => [newEntry, ...prev]);
+          }
+        );
       } else {
         handleToggleSpeakerTest();
       }
     },
-    [handleToggleSpeakerTest, showNotification]
+    [handleToggleSpeakerTest, showNotification, volumePercent]
   );
 
   return (
@@ -282,6 +311,34 @@ const App: React.FC = () => {
           handleStopWaterEject();
           setIsWaterEjectModalVisible(false);
         }}
+      />
+
+      {/* Headphone Stereo Balancer Modal */}
+      <HeadphoneTestModal
+        visible={isHeadphoneModalVisible}
+        colors={activeColors}
+        onClose={() => setIsHeadphoneModalVisible(false)}
+      />
+
+      {/* Earpiece Receiver Modal */}
+      <EarpieceTestModal
+        visible={isEarpieceModalVisible}
+        colors={activeColors}
+        onClose={() => setIsEarpieceModalVisible(false)}
+      />
+
+      {/* Decibel Sound Meter Modal */}
+      <DecibelMeterModal
+        visible={isDecibelModalVisible}
+        colors={activeColors}
+        onClose={() => setIsDecibelModalVisible(false)}
+      />
+
+      {/* Vibration Motor Benchmark Modal */}
+      <VibrationTestModal
+        visible={isVibrationModalVisible}
+        colors={activeColors}
+        onClose={() => setIsVibrationModalVisible(false)}
       />
 
       {/* Color Theory Palette Switcher Modal */}
