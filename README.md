@@ -9,6 +9,18 @@
 
 ---
 
+## 📱 App Screenshots
+
+| <img src="./assets/screenshots/speaker_home.png" width="220" alt="Home - Tone Tester & Presets" /> | <img src="./assets/screenshots/speaker_test_active.png" width="220" alt="Active Speaker Sweep" /> | <img src="./assets/screenshots/speaker_dark_mode.png" width="220" alt="Midnight Lime Dark Mode" /> | <img src="./assets/screenshots/speaker_diagnostics.png" width="220" alt="Hardware Diagnostics" /> |
+| :---: | :---: | :---: | :---: |
+| *Home & Multi-Frequency Presets* | *Live Active Sine Waveform* | *Midnight Lime Dark Mode (15.43:1 AAA)* | *Hardware Diagnostics Suite* |
+
+| <img src="./assets/screenshots/speaker_water_ejector.png" width="220" alt="165 Hz Water Ejector" /> | <img src="./assets/screenshots/speaker_palette_modal.png" width="220" alt="Color Theory Lab" /> | <img src="./assets/screenshots/speaker_history.png" width="220" alt="Diagnostics History Log" /> | <img src="./assets/screenshots/speaker_settings.png" width="220" alt="Audio Safety Settings" /> |
+| :---: | :---: | :---: | :---: |
+| *165 Hz Acoustic Water Ejector* | *Color Theory Lab (WCAG Pass)* | *Test Sweep History Logs* | *Volume Limiter & Safety Preferences* |
+
+---
+
 ## 📖 Research Background & Benchmark Precedent
 
 This application is built directly from the empirical findings in:
